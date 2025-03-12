@@ -1,0 +1,54 @@
+reference:
+    Human:
+        fasta: "/data/resources/reference/hg38/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa"
+        gtf: "/data/resources/reference/hg38/Homo_sapiens.GRCh38.113.primary_assembly.gtf"
+    Mouse:
+        fasta: "/data/resources/reference/GRCm39/Mus_musculus.GRCm39.dna_sm.primary_assembly.fa"
+        gtf: "/data/resources/reference/GRCm39/Mus_musculus.GRCm39.113.primary_assembly.gtf"
+    Rice:
+        fasta: "/data/resources/reference/rice/Oryza_sativa.IRGSP-1.0.dna_sm.toplevel.fa"
+        gtf: "/data/resources/reference/rice/Oryza_sativa.IRGSP-1.0.60.gtf"
+    Soybean:
+        fasta: "/data/resources/reference/soybean/Glycine_max.Glycine_max_v2.1.dna_sm.toplevel.fa"
+        gtf: "/data/resources/reference/soybean/Glycine_max.Glycine_max_v2.1.60.gtf"
+    ERCC:
+        fasta: "/data/resources/reference/ERCC/ERCC92.fa"
+        gtf: "/data/resources/reference/ERCC/ERCC92.gtf"
+glycine_opts: "-5 AAGCAGTGGTATCAACGCAGAGTACATGGG -3 AAGCAGTGGTATCAACGCAGAGTAC -e 0.25,0.4 -s 100,100 -L 0 -u 10 -l 10"
+minimap_genome_index_opts: "-x splice -k14"
+minimap2_opts:
+    genome: "-ax splice -uf -k14 --secondary=no"
+    transcriptome: "-ax map-ont --secondary=no"
+SQANTI3_HOME: "/data/software/SQANTI3-5.2.2"
+SUPPA_HOME: "/data/software/SUPPA-2.4"
+jaffal_refBase: "/data/resources/reference/JAFFA_REFERENCE_FILES_HG38_GENCODE22.V2/"
+modules:
+    module1: True
+    module2: True
+    module3: True
+threads:
+    glycine: 4
+    build_genome_index: 4
+    build_transcriptome_index: 4
+    map_reads: 16
+    isoquant: 16
+    sqanti3_qc: 16
+    count_reads: 8
+    de_analysis: 4
+    jaffal: 16
+
+stranded: "forward"
+salmon_libtype: "SF"
+
+# Genes expressed in minimum this many samples
+min_samps_gene_expr: 3
+# Transcripts expressed in minimum this many samples
+min_samps_feature_expr: 1
+# Minimum gene counts
+min_gene_expr: 10
+# Minimum transcript counts
+min_feature_expr: 3
+
+# Set differential spicing cutoff to plot sashimi
+AS_dPSI: 0.2
+AS_pval: 0.1
