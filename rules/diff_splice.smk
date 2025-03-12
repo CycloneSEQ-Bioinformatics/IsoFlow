@@ -80,7 +80,7 @@ rule diffSplice:
     ## Split the PSI files between 2 conditions:
     Rscript {SUPPA_HOME}/scripts/split_file.R {input.isoform_psi} {params.ctrl_samples} {params.treat_samples} {params.outdir}/iso_isoform.ctrl.psi {params.outdir}/iso_isoform.treat.psi -i >> {log} 2>&1
     ## perform the differential splicing analysis
-    python {SUPPA_HOME}/suppa.py diffSplice -m classical -gc -i {input.isoform} -p {params.outdir}/events.ctrl.psi {params.outdir}/events.treat.psi -e {params.outdir}/iso.ctrl.tpm {params.outdir}/iso.treat.tpm -th 1 -o suppa_diffSplice_iso >> {log} 2>&1
+    python {SUPPA_HOME}/suppa.py diffSplice -m classical -gc -i {input.isoform} -p {params.outdir}/iso_isoform.ctrl.psi {params.outdir}/iso_isoform.treat.psi -e {params.outdir}/iso.ctrl.tpm {params.outdir}/iso.treat.tpm -th 1 -o suppa_diffSplice_iso >> {log} 2>&1
     mv suppa_diffSplice_event* {params.outdir}/
     mv suppa_diffSplice_iso* {params.outdir}/
     {SNAKEDIR}/scripts/add_gene_name.R {input.trs_info} {output.event_dpsi} rowname
@@ -131,6 +131,6 @@ rule plot_sashimi:
             echo ">$event_id" >> {log}
             {SNAKEDIR}/scripts/ggsashimi.py -b {input.bamlist} -c $chrom:$start-$end -S $strand -g {input.gtf} -C 3 -F png --height 1.5 --ann-height 2 --width $((2*{params.n_samples}+2)) -o {params.outdir}/${{event_id_new}}.${{event_dPSI}}.${{event_pval}}.png >> {log} 2>&1
         done < {params.outdir}/suppa_diffSplice_event.sig.dpsi
-        echo "Plot successfully" {params.outdir}/plot.log
+        echo "Plot successfully" > {params.outdir}/plot.log
     fi
     """
