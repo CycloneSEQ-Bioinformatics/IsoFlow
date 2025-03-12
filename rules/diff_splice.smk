@@ -88,7 +88,7 @@ rule write_bamlist:
     output:
         bamlist = "diff_splice/plot_sashimi/input_bams.tsv",
     run:
-        manifest['bam'] = manifest['alias'].apply(lambda x: os.path.join("genome_alignments", x, "aligned.sort.bam"))
+        manifest['bam'] = manifest['alias'].apply(lambda x: os.path.join(os.getcwd(), "genome_alignments", x, "aligned.sort.bam"))
         manifest.loc[:, ["alias", "bam", "condition"]].to_csv(output.bamlist, sep="\t", header=False, index=False)
 
 rule plot_sashimi:
@@ -96,6 +96,7 @@ rule plot_sashimi:
         bamlist = rules.write_bamlist.output.bamlist,
         event_dpsi = rules.diffSplice.output.event_dpsi,
         gtf = config["reference"][config["specie"]]["gtf"],
+        genome = config["reference"][config["specie"]]["fasta"]
     output:
         plot_log = "diff_splice/plot_sashimi/plot.log",
     params:
@@ -103,19 +104,26 @@ rule plot_sashimi:
         n_samples = len(all_samples.keys()),
         AS_dPSI = config['AS_dPSI'],
         AS_pval = config['AS_pval'],
+    log: "logs/plot_sashimi.log"
     benchmark: "benchmarks/plot_sashimi.benchmark"
     conda: "ggsashimi_env"
     shell:"""
-    awk -v AS_dPSI={params.AS_dPSI} -v AS_pval={params.AS_pval} 'NR>1 && ($2<=-AS_dPSI || $2>=AS_dPSI) && ($3!="nan" && $3<=AS_pval)' {input.event_dpsi} | sort -k3,3n > {params.outdir}/suppa_diffSplice_event.sig.dpsi
+    if [ ! -f {input.genome}.fai ];then
+        samtools faidx {input.genome}
+    fi
+    awk -v AS_dPSI={params.AS_dPSI} -v AS_pval={params.AS_pval} -v OFS='\\t' 'NR>1 && ($2<=-AS_dPSI || $2>=AS_dPSI) && ($3!="nan" && $3<=AS_pval){{split($1,a,/;/);split(a[2],b,/:/);chrom=b[2];split(b[3],c,/-/);start=c[1];strand=b[length(b)];split(b[length(b)-1],c,/-/);end=c[length(c)];print chrom,start,end,strand,$0}}' {input.event_dpsi} | sort -k7,7n | bedtools slop -b 1000 -g {input.genome}.fai -i - > {params.outdir}/suppa_diffSplice_event.sig.dpsi
     if [ "$(wc -l < {params.outdir}/suppa_diffSplice_event.sig.dpsi)" -eq 0 ]; then
         echo "There is no siginificant differential splicing event" > {params.outdir}/plot.log
     else
-        while IFS=$'\\t' read -r event_id event_dPSI event_pval;do
+        while IFS=$'\\t' read -r chrom start end strand event_id event_dPSI event_pval;do
             event_id_new=$(echo "$event_id" | sed 's/[:;]/_/g')
-            chrom=$(echo "$event_id" | awk -F':' '{{print $2}}')
-            start=$(echo "$event_id" | awk -F':' '{{split($3,a,"-");print a[1]-1000}}')
-            end=$(echo "$event_id" | awk -F':' '{{split($(NF-1),a,"-");print a[2]+1000}}')
-            {SNAKEDIR}/scripts/ggsashimi.py -b {input.bamlist} -c $chrom:$start-$end -g {input.gtf} -C 3 -F png --height 1 --ann-height 2 --width $((2*{params.n_samples}+2)) -o {params.outdir}/${{event_id_new}}.${{event_dPSI}}.${{event_pval}}.png
+            if [ $strand == "+" ];then
+                strand=plus
+            else
+                strand=minus
+            fi
+            echo ">$event_id" >> {log}
+            {SNAKEDIR}/scripts/ggsashimi.py -b {input.bamlist} -c $chrom:$start-$end -S $strand -g {input.gtf} -C 3 -F png --height 1.5 --ann-height 2 --width $((2*{params.n_samples}+2)) -o {params.outdir}/${{event_id_new}}.${{event_dPSI}}.${{event_pval}}.png >> {log} 2>&1
         done < {params.outdir}/suppa_diffSplice_event.sig.dpsi
         echo "Plot successfully" {params.outdir}/plot.log
     fi

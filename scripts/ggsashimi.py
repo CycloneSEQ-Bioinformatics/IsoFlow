@@ -677,7 +677,8 @@ if __name__ == "__main__":
                 a, junctions = read_bam(bam, args.coordinates, args.strand)
                 if a.keys() == ["+"] and all(map(lambda x: x==0, list(a.values()[0]))):
                         print("WARN: Sample {} has no reads in the specified area.".format(id))
-                        continue
+                        exit(0)
+                        #continue
                 id_list.append(id)
                 label_dict[id] = label_text
                 for strand in a:
@@ -700,7 +701,7 @@ if __name__ == "__main__":
         # No bam files
         if not bam_dict["+"]:
                 print("ERROR: No available bam files.")
-                exit(1)
+                exit(0)
 
         # Write junctions to BED
         if args.junctions_bed:
