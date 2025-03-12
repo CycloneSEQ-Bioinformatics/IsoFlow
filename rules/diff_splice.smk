@@ -58,6 +58,7 @@ rule diffSplice:
         isoform_psi = rules.calcPSI.output.isoform,
         event = rules.generateEvents.output.event,
         isoform = rules.generateEvents.output.isoform,
+        trs_info=rules.build_transcriptome_index.output.trs_info,
     output:
         event_dpsi = "diff_splice/suppa_diffSplice_event.dpsi",
         isoform_dpsi = "diff_splice/suppa_diffSplice_iso.dpsi"
@@ -82,6 +83,8 @@ rule diffSplice:
     python {SUPPA_HOME}/suppa.py diffSplice -m classical -gc -i {input.isoform} -p {params.outdir}/events.ctrl.psi {params.outdir}/events.treat.psi -e {params.outdir}/iso.ctrl.tpm {params.outdir}/iso.treat.tpm -th 1 -o suppa_diffSplice_iso >> {log} 2>&1
     mv suppa_diffSplice_event* {params.outdir}/
     mv suppa_diffSplice_iso* {params.outdir}/
+    {SNAKEDIR}/scripts/add_gene_name.R {input.trs_info} {output.event_dpsi} rowname
+    {SNAKEDIR}/scripts/add_gene_name.R {input.trs_info} {output.isoform_dpsi} rowname
     """
 
 rule write_bamlist:
