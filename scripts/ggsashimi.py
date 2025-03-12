@@ -241,8 +241,8 @@ def prepare_for_R(a, junctions, c, m):
                 accs.append(acc)
                 counts.append(n)
 
-                yd.append( a[ don - start -1 ])
-                ya.append( a[ acc - start +1 ])
+                yd.append( a[ don - start - 1 ])
+                ya.append( a[ min(acc - start + 1, len(a)-1) ])
 
         return x, y, dons, accs, yd, ya, counts
 
