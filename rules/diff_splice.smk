@@ -33,7 +33,8 @@ rule calcPSI:
         event = rules.generateEvents.output.event,
         isoform = rules.generateEvents.output.isoform,
         tpm_tsv = rules.trs_quant.output.tpm_tsv,
-        gtf = config["reference"][config["specie"]]["gtf"]
+        gtf = config["reference"][config["specie"]]["gtf"],
+        trs_info=rules.build_transcriptome_index.output.trs_info,
     output:
         event = "diff_splice/events.psi",
         isoform = "diff_splice/iso_isoform.psi"
@@ -44,8 +45,10 @@ rule calcPSI:
     shell:"""
     # compute the PSI values of the events
     python {SUPPA_HOME}/suppa.py psiPerEvent -i {input.event} -e {input.tpm_tsv} -o {params.outdir}/events > {log} 2>&1
+    {SNAKEDIR}/scripts/add_gene_name.R {input.trs_info} {output.event} rowname
     # compute the PSI values of the isoforms
     python {SUPPA_HOME}/suppa.py psiPerIsoform -g {input.gtf} -e {input.tpm_tsv} -o {params.outdir}/iso >> {log} 2>&1
+    {SNAKEDIR}/scripts/add_gene_name.R {input.trs_info} {output.isoform} rowname
     """
 
 rule diffSplice:
