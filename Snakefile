@@ -71,8 +71,8 @@ def rule_all_input(modules_dict):
         #all_input.append("de_analysis/filtered_transcript_counts_with_genes.tsv")
         #all_input.append("de_analysis/dtu_plots.pdf")
     if modules_dict['module3']:
-        all_input.extend(expand('jaffal_fusion/{sample}/jaffa_results.csv', sample=all_samples.keys()))
-        all_input.extend(expand('jaffal_fusion/{sample}/jaffa_results.csv', sample=all_samples.keys()))
+        all_input.append("jaffal_fusion/jaffa_results.csv")
+        all_input.append("jaffal_fusion/plot.log")
        
     return all_input
 

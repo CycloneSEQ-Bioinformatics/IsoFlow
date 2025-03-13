@@ -130,6 +130,12 @@ rule plot_sashimi:
             fi
             echo ">$event_id" >> {log}
             {SNAKEDIR}/scripts/ggsashimi.py -b {input.bamlist} -c $chrom:$start-$end -S $strand -g {input.gtf} -C 3 -F png --height 1.5 --ann-height 2 --width $((2*{params.n_samples}+2)) -o {params.outdir}/${{event_id_new}}.${{event_dPSI}}.${{event_pval}}.png >> {log} 2>&1
+            if (echo $event_id | grep -q SE) && [ -f {params.outdir}/${{event_id_new}}.${{event_dPSI}}.${{event_pval}}.png ] && [ ! -f {params.outdir}/which_to_show ];then
+                echo "${{event_id_new}}.${{event_dPSI}}.${{event_pval}}.png" > {params.outdir}/which_to_show
+            fi
+            if [ -f {params.outdir}/${{event_id_new}}.${{event_dPSI}}.${{event_pval}}.png ] && [ ! -f {params.outdir}/which_most_sig ];then
+                echo "${{event_id_new}}.${{event_dPSI}}.${{event_pval}}.png" > {params.outdir}/which_most_sig
+            fi
         done < {params.outdir}/suppa_diffSplice_event.sig.dpsi
         echo "Plot successfully" > {params.outdir}/plot.log
     fi

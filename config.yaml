@@ -2,9 +2,11 @@ reference:
     Human:
         fasta: "/data/resources/reference/hg38/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa"
         gtf: "/data/resources/reference/hg38/Homo_sapiens.GRCh38.113.primary_assembly.gtf"
+        version: "hg38"
     Mouse:
         fasta: "/data/resources/reference/GRCm39/Mus_musculus.GRCm39.dna_sm.primary_assembly.fa"
         gtf: "/data/resources/reference/GRCm39/Mus_musculus.GRCm39.113.primary_assembly.gtf"
+        version: "mm10"
     Rice:
         fasta: "/data/resources/reference/rice/Oryza_sativa.IRGSP-1.0.dna_sm.toplevel.fa"
         gtf: "/data/resources/reference/rice/Oryza_sativa.IRGSP-1.0.60.gtf"

@@ -40,8 +40,8 @@ txdf <- txdf %>% merge(cov_tab, by="transcript_id", all=TRUE) %>% mutate(depth=1
 
 cov_stat <- rbind(
 		txdf %>% dplyr::filter(gene_biotype %in% c("protein_coding", "lncRNA")) %>% group_by(gene_biotype) %>% summarise(coverage=mean(coverage>=0.8)) %>% mutate(feature="transcript"),
-		txdf %>% dplyr::filter(gene_biotype %in% c("protein_coding", "lncRNA")) %>% group_by(GeneID, gene_biotype) %>% summarise(coverage=max(coverage)) %>% as.data.frame %>% group_by(gene_biotype) %>% summarise(coverage=mean(coverage>=0.8)) %>% mutate(feature="gene"),
+		txdf %>% dplyr::filter(gene_biotype %in% c("protein_coding", "lncRNA")) %>% group_by(gene_id, gene_biotype) %>% summarise(coverage=max(coverage)) %>% as.data.frame %>% group_by(gene_biotype) %>% summarise(coverage=mean(coverage>=0.8)) %>% mutate(feature="gene"),
 		txdf %>% dplyr::filter(gene_biotype %in% c("protein_coding", "lncRNA")) %>% summarise(coverage=mean(coverage>=0.8)) %>% mutate(gene_biotype="protein_coding & lncRNA", feature="transcript"),
-		txdf %>% dplyr::filter(gene_biotype %in% c("protein_coding", "lncRNA")) %>% group_by(GeneID) %>% summarise(coverage=max(coverage)) %>% as.data.frame %>% summarise(coverage=mean(coverage>=0.8))  %>% mutate(gene_biotype="protein_coding & lncRNA", feature="gene")
+		txdf %>% dplyr::filter(gene_biotype %in% c("protein_coding", "lncRNA")) %>% group_by(gene_id) %>% summarise(coverage=max(coverage)) %>% as.data.frame %>% summarise(coverage=mean(coverage>=0.8))  %>% mutate(gene_biotype="protein_coding & lncRNA", feature="gene")
 		  )
 write.table(cov_stat, outfile, sep='\t', row.names=FALSE, quote=FALSE)
