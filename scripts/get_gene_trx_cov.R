@@ -31,12 +31,12 @@ outfile <- args[3]
 
 txdf <- read.table(trx_infoTab_file, header=TRUE) 
 
-#cov_tab <- read.table(cov_file, col.names=c('transcript_id', 'depth', 'coverage')) %>% filter(depth==1)
-cov_tab <- read.table(cov_file, col.names=c('TrxID', 'depth', 'coverage')) %>% filter(depth==1)
+cov_tab <- read.table(cov_file, col.names=c('transcript_id', 'depth', 'coverage')) %>% filter(depth==1)
+#cov_tab <- read.table(cov_file, col.names=c('TrxID', 'depth', 'coverage')) %>% filter(depth==1)
 
-#txdf <- txdf %>% merge(cov_tab, by="transcript_id", all=TRUE) %>% mutate(depth=1, coverage=ifelse(is.na(coverage), 0, coverage))
+txdf <- txdf %>% merge(cov_tab, by="transcript_id", all=TRUE) %>% mutate(depth=1, coverage=ifelse(is.na(coverage), 0, coverage))
 #txdf <- txdf %>% merge(gene_info, by="GENEID", all=TRUE)
-txdf <- txdf %>% merge(cov_tab, by="TrxID", all=TRUE) %>% mutate(depth=1, coverage=ifelse(is.na(coverage), 0, coverage))
+#txdf <- txdf %>% merge(cov_tab, by="TrxID", all=TRUE) %>% mutate(depth=1, coverage=ifelse(is.na(coverage), 0, coverage))
 
 cov_stat <- rbind(
 		txdf %>% dplyr::filter(gene_biotype %in% c("protein_coding", "lncRNA")) %>% group_by(gene_biotype) %>% summarise(coverage=mean(coverage>=0.8)) %>% mutate(feature="transcript"),
