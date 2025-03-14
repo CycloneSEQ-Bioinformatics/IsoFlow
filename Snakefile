@@ -79,4 +79,14 @@ def rule_all_input(modules_dict):
 
 rule all:
     input:
+        "Report.html"
+
+rule generate_report:
+    input:
         rule_all_input(config["modules"]),
+    output:
+        html = "Report.html",
+    shell:"""
+    {SNAKEDIR}/scripts/ReportGeneration.py
+    """
+
