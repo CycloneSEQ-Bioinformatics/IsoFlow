@@ -28,7 +28,7 @@ rule map_reads_to_genome: ## map reads using minimap2
         "benchmarks/map_reads_to_genome.{sample}.benchmark"
     threads: config["threads"]["map_reads"]
     shell:"""
-    minimap2 -t {threads} {params.opts} {input.index} {input.fastq} 2>{log} | samtools view -q 10 -F 2304 -Sb > {output.bam}
-    samtools sort -@ {threads} --write-index -o {output.sbam} {output.bam} 2>>{log}
-    samtools flagstat -@ {threads} -O tsv {output.sbam} | awk -f {SNAKEDIR}/scripts/bamstat_fmt.awk > {output.alnstat}
+    minimap2 -t {threads} {params.opts} {input.index} {input.fastq} 2>{log} | samtools view -Sb > {output.bam}
+    samtools view -h -q 10 -F 2304 {output.bam} | samtools sort -@ {threads} --write-index -o {output.sbam} 2>>{log}
+    samtools flagstat -@ {threads} -O tsv {output.bam} | awk -f {SNAKEDIR}/scripts/bamstat_fmt.awk > {output.alnstat}
     """
