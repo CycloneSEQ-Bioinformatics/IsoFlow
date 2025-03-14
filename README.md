@@ -147,9 +147,9 @@ Configuration parameters are specified and modified in the `config.yaml` file:
     
     ```
     modules:
-        module1: True # 转录组重构与新型转录本鉴定
-        module2: True # 已知转录本的定量与差异表达分析
-        module3: True # 融合基因检测
+        module1: True
+        module2: True
+        module3: True
     ```
 
 ### Prepare for sample sheet
@@ -251,7 +251,7 @@ Output of module 3：
 
     The file jaffal_fusion/jaffa_results.csv summarizes the fusion gene identification results for all samples.
         
-### 使用
+### Usage
     
 The analysis of this pipeline needs to be performed in the conda environment created earlier.
 
