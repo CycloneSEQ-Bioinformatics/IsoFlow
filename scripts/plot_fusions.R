@@ -36,11 +36,14 @@ if(ref_version %in% c('hg19', 'hg38', 'mm9', 'mm10')){
 inTab <- read.csv(jaffa_results, stringsAsFactors=FALSE)
 inTab <- inTab %>% filter(classification=="HighConfidence") %>% rowwise %>% mutate(sample=str_split_1(sample, "\\.")[1])  %>% as.data.frame
 inTab_mat <- inTab %>% dplyr::select(fusion.genes, sample, spanning.reads) %>% group_by(fusion.genes, sample) %>% summarise(spanning.reads=sum(spanning.reads)) %>% spread(sample, spanning.reads, fill=0) %>% tibble::column_to_rownames("fusion.genes")
-inTab_mat <- inTab_mat[rowMeans(inTab_mat)>5,]
+inTab_mat <- inTab_mat[rowMeans(inTab_mat)>1,]
+inTab_mat_gather <- inTab_mat %>% tibble::rownames_to_column("fusion") %>% gather(key="sample", value="count", -fusion) %>% mutate(logCount=log(count+0.1))    
+
 
 print("plot heatmap for spanning reads count")
 png(str_glue('{outdir}/span_reads_heatmap.png'))
-pheatmap(inTab_mat, scale='none', cluster_rows=FALSE, cluster_cols=FALSE, display_numbers=TRUE, number_format="%d", main="Spanning reads count (high confidence)")
+# pheatmap(inTab_mat, scale='none', cluster_rows=FALSE, cluster_cols=FALSE, display_numbers=TRUE, number_format="%d", main="Spanning reads count (high confidence)")
+ggplot(inTab_mat_gather, aes(x=sample, y=fusion, fill=logCount)) + geom_tile() + geom_text(aes(label = round(count, 1)), color = "black", size = 3) + scale_fill_gradient(low = "white", high = "red") + labs(x="", y="", title="Spanning reads count (high confidence)") + themelegend.position='none'()
 dev.off()
 
 alignments_gr_list <- list()

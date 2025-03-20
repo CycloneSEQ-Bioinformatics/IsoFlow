@@ -79,14 +79,17 @@ def rule_all_input(modules_dict):
 
 rule all:
     input:
-        "Report.html"
+        "report_files/Report_EN.html",
+        "report_files/Report_CN.html",
 
 rule generate_report:
     input:
         rule_all_input(config["modules"]),
     output:
-        html = "Report.html",
+        html_EN = "report_files/Report_EN.html",
+        html_CN = "report_files/Report_CN.html",
     shell:"""
-    {SNAKEDIR}/scripts/ReportGeneration.py
+    {SNAKEDIR}/scripts/Report_EN.py
+    {SNAKEDIR}/scripts/Report_CN.py
     """
 
