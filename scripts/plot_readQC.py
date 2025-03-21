@@ -78,7 +78,7 @@ def plot_readQC_distribution(stat_file, tag_name, outfile_preffix):
         read_gc,
         range=(xmin, xmax),
         bins=50,
-        color="#006400",
+        color="#00008B",
         alpha=0.7,
     )
     ax.set_xlabel("GC content")
@@ -93,7 +93,7 @@ def plot_readQC_distribution(stat_file, tag_name, outfile_preffix):
         read_qual,
         range=(xmin, xmax),
         bins=50,
-        color="#006400",
+        color="#FFA500",
         alpha=0.7,
     )
     ax.set_xlabel("Read quality")
