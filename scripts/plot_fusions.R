@@ -43,7 +43,7 @@ inTab_mat_gather <- inTab_mat %>% tibble::rownames_to_column("fusion") %>% gathe
 print("plot heatmap for spanning reads count")
 png(str_glue('{outdir}/span_reads_heatmap.png'))
 # pheatmap(inTab_mat, scale='none', cluster_rows=FALSE, cluster_cols=FALSE, display_numbers=TRUE, number_format="%d", main="Spanning reads count (high confidence)")
-ggplot(inTab_mat_gather, aes(x=sample, y=fusion, fill=logCount)) + geom_tile() + geom_text(aes(label = round(count, 1)), color = "black", size = 3) + scale_fill_gradient(low = "white", high = "red") + labs(x="", y="", title="Spanning reads count (high confidence)") + themelegend.position='none'()
+ggplot(inTab_mat_gather, aes(x=sample, y=fusion, fill=logCount)) + geom_tile() + geom_text(aes(label = round(count, 1)), color = "black", size = 3) + scale_fill_gradient(low = "white", high = "red") + labs(x="", y="", title="Spanning reads count (high confidence)") + theme(legend.position='none')
 dev.off()
 
 alignments_gr_list <- list()
