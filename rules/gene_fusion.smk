@@ -18,6 +18,18 @@ rule jaffal_fuison:
     bpipe run -n {threads} -p refBase={params.refBase} -p jaffa_output={params.outdir} $groovy {input.fastq} >{log} 2>&1
     """
 
+rule plot_fusion_circos:
+    input:
+        csv = "jaffal_fusion/{sample}/jaffa_results.csv"
+    output:
+        png = "jaffal_fusion/{sample}/gene_fusion_circos_plot.png"
+    params:
+        outdir = 'jaffal_fusion/{sample}/'
+    shell:"""
+    {SNAKEDIR}/scripts/gene_fusion_circos.R {SNAKEDIR}/data/Homo_sapiens.GRCh38.CytoBandIdeo.txt {SNAKEDIR}/data/Homo_sapiens.GRCh38.GeneInfo.txt {input.csv} {params.outdir}
+    """
+
+
 rule plot_fusions:
     input:
         csvs = expand("jaffal_fusion/{sample}/jaffa_results.csv", sample=all_samples.keys())

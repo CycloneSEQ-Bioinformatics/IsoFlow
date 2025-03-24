@@ -73,6 +73,7 @@ def rule_all_input(modules_dict):
     if modules_dict['module3']:
         all_input.append("jaffal_fusion/jaffa_results.csv")
         all_input.append("jaffal_fusion/plot.log")
+        all_input.extend(expand("jaffal_fusion/{sample}/gene_fusion_circos_plot.png", sample=all_samples.keys()))
        
     return all_input
 
