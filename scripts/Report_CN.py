@@ -248,9 +248,20 @@ if sashimi_filename:
 else:
     Most_significance_sashimi_plot = None
 
-#4 span_reads_heatmap.png
 
-fusion_heatmap = image_to_base64("jaffal_fusion/span_reads_heatmap.png")
+#4 gene_fusion_circos_plot.png
+fusion_images = {} 
+root_dir1 = 'jaffal_fusion'
+mix_categories1 = []
+
+for subdir in os.listdir(root_dir1):
+    subdir_path = os.path.join(root_dir1, subdir)
+    if os.path.isdir(subdir_path) and subdir != '.ipynb_checkpoints':
+        mix_categories1.append(subdir)
+
+for mix in mix_categories1:
+    fusion_images[mix] = image_to_base64(f"jaffal_fusion/{mix}/gene_fusion_circos_plot.png")
+
 
 #4 which_to_show
 fusion_plot_dir = './jaffal_fusion'
@@ -510,6 +521,34 @@ html_template = """
 
         .accordion-button.active:after {
           content: "-"; /* 减号 */
+        }
+        
+        /* 精准调整3.4和3.5按钮，使其文字与普通li对齐 */
+
+        .accordion-button.subsection-aligned { 
+            position: relative;
+            padding-left: 8px;
+            font-weight: normal;            /* 去掉加粗 */
+            background-color: transparent;  /* 默认背景透明 */
+            box-shadow: none;               /* 防止额外的阴影效果 */
+            color: #000000;
+        }
+
+        .accordion-button.subsection-aligned:after {
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .accordion-button.subsection-aligned:hover,
+        .accordion-button.subsection-aligned.active {
+            background-color: transparent;  /* 悬停和激活时也保持无背景 */
+            font-weight: normal;            /* 防止悬停时加粗 */
+        }       
+
+        .subsection-li {
+            margin: 5px 0;
         }
 
         /* 手风琴面板样式 */
@@ -794,27 +833,31 @@ html_template = """
                     <li><a href="#b1" class="toc-link">3.1 转录组比对</a></li>
                     <li><a href="#b2" class="toc-link">3.2 已知转录本及基因覆盖度</a></li>
                     <li><a href="#b3" class="toc-link">3.3 TPM(Transcripts Per Million)</a></li>
-                    <!-- 三级标题 -->
-                    <button class="accordion-button">
-                        <a href="#b4" style="text-decoration: none; color: inherit;">3.4 差异表达分析 </a>
-                    </button>
-                    <div class="submenu-3">
-                        <ul class="list-unstyled">
-                            <li><a href="#b5" class="toc-link">3.4.1 差异基因表达</a></li>
-                            <li><a href="#b6" class="toc-link">3.4.2 差异转录本表达</a></li>
-                        </ul>
-                    </div>
+                    
+                    <li class="subsection-li">
+                        <button class="accordion-button subsection-aligned">
+                            <span>3.4 差异基因表达</span>
+                        </button>
+                        <div class="submenu-3">
+                            <ul class="list-unstyled">
+                                <li><a href="#b5" class="toc-link">3.4.1 差异基因表达</a></li>
+                                <li><a href="#b6" class="toc-link">3.4.2 差异转录本表达</a></li>
+                            </ul>
+                        </div>
+                    </li>
 
                     <!-- 三级标题 -->
-                    <button class="accordion-button">
-                        <a href="#b7" style="text-decoration: none; color: inherit;">3.5 可变剪切分析 </a>
-                    </button>
-                    <div class="submenu-3">
-                        <ul class="list-unstyled">
-                            <li><a href="#b8" class="toc-link">3.5.1 局部事件差异剪接</a></li>
-                            <li><a href="#b9" class="toc-link">3.5.2 差异转录本使用</a></li>
-                        </ul>
-                    </div>
+                    <li class="subsection-li">
+                        <button class="accordion-button subsection-aligned">
+                            <span>3.5 可变剪切分析</span>
+                        </button>
+                        <div class="submenu-3">
+                            <ul class="list-unstyled">
+                                <li><a href="#b8" class="toc-link">3.5.1 局部事件差异剪接</a></li>
+                                <li><a href="#b9" class="toc-link">3.5.2 差异转录本使用</a></li>
+                            </ul>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -918,13 +961,6 @@ html_template = """
 
     <!-- JavaScript 部分 -->
     <script type="text/javascript">
-        // 页面加载时自动显示第一个样本的图片
-        window.onload = function() {
-            // 默认显示第一个样本的信息
-            const selectElement = document.getElementById("sample-select");
-            selectElement.value = selectElement.options[1].value; // 设置为第一个样本的值
-            showImages(selectElement);  // 调用函数显示对应的图片
-        };
 
         function showImages(selectElement) {
             // 隐藏所有的图片组
@@ -1283,19 +1319,71 @@ html_template = """
             </div>
             
             
-            <!-- 添加单个图片：results_dge.maplot.png -->
-            <div class="image-text-container bordered">
-                <div class="image-half">
-                    <img src="{{ fusion_heatmap }}" alt="fusion_heatmap" style="width: 70%; height: auto;">
+            <!-- 下拉菜单 -->
+            <label for="fusion-sample-select"></label>
+            <select id="fusion-sample-select" onchange="showFusionImage(this)">
+                <option value="">--Please choose a sample--</option>
+                {% for mix in fusion_images.keys()  | sort %}
+                <option value="{{ mix }}">{{ mix }}</option>
+                {% endfor %}
+            </select>
+            
+            <!-- 图片+文本排版容器 -->
+            <div id="fusion-image-container" style="margin-top: 20px;">
+                {% for mix, img_data in fusion_images.items()  %}
+                <div id="fusion-{{ mix }}" class="fusion-image" style="display: none;">
+                    <!-- 使用原来排版方式，图片+文本部分 -->
+                    <div class="image-text-container bordered">
+                        <div class="image-half">
+                            <img src="{{ img_data }}" alt="{{ mix }} gene fusion plot" style="width: 70%; height: auto;">
+                        </div>
+                        <div class="text-half">
+                            <p>
+                                该 Circos 图展示了检测到的基因融合事件。图中连接基因组区域的弧线代表融合事件：红色弧线表示尚未报道的潜在新融合事件（未知）；蓝色弧线表示已报道的已知融合事件。弧线的粗细与 JAFFAL 分析检测到的支持该融合的 spanning reads 数量成正比，数量越多，弧线越粗。 <br>
+                            </p>
+                        </div> 
+                    </div>
                 </div>
-                <div class="text-half">
-                    <p>
-                        下图展示了高度显著的融合基因的热图,x轴代表样本ID,y轴代表融合基因对,颜色深度反映支持该事件的read数量。 <br>
-                    </p>
-                </div> 
+                {% endfor %}
             </div>
             
-            
+            <script type="text/javascript">
+                function showFusionImage(selectElement) {
+                    // 隐藏所有图像
+                    const allImages = document.querySelectorAll('.fusion-image');
+                    allImages.forEach(image => {
+                        image.style.display = 'none';
+                    });
+
+                    // 获取用户选择的样本
+                    const selectedSample = selectElement.value;
+
+                    // 如果选择了某个样本，显示对应的图片
+                    if (selectedSample) {
+                        const selectedImage = document.getElementById('fusion-' + selectedSample);
+                        if (selectedImage) {
+                            selectedImage.style.display = 'block';
+                        }
+                    }
+                }
+
+                // 页面加载自动显示第一个样本（可选）
+                    window.onload = function() {
+                    // 1.1 默认选择第一个样本
+                    const qcSelect = document.getElementById("sample-select");
+                    if (qcSelect && qcSelect.options.length > 1) {
+                        qcSelect.selectedIndex = 1;
+                        showImages(qcSelect);
+                    }
+
+                    // 4.1 默认选择第一个样本
+                    const fusionSelect = document.getElementById("fusion-sample-select");
+                    if (fusionSelect && fusionSelect.options.length > 1) {
+                        fusionSelect.selectedIndex = 1;
+                        showFusionImage(fusionSelect);
+                    }
+                };
+            </script>
             
             <p>
                 
@@ -1414,8 +1502,8 @@ iso_isoform_df_html=iso_isoform_df_html,
 suppa_diffSplice_iso_df_html=suppa_diffSplice_iso_df_html,
 Most_significance_sashimi_plot=Most_significance_sashimi_plot,
 jaffa_results_df_html=jaffa_results_df_html,
-fusion_heatmap=fusion_heatmap,
-fusion_plot=fusion_plot)
+fusion_plot=fusion_plot,
+fusion_images=fusion_images)
 
 
 output_file = 'report_files/Report_CN.html'  # 修改为您想要的文件名

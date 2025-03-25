@@ -35,8 +35,12 @@ rule qc_pass:
         "benchmarks/qc_pass.{sample}.benchmark"
     threads: 8
     shell:"""
-    seqkit sample -p 0.1 -j {threads} -o {params.preffix}.sampled.fq.gz {input.fastq} > {log} 2>&1
-    seqkit fx2tab -l -g -q -n -j {threads} --compress-level 5 -o {output.stat} {params.preffix}.sampled.fq.gz > {log} 2>&1
+    if [ ! -f {params.preffix}.sampled.fq.gz ];then
+        seqkit sample -p 0.1 -j {threads} -o {params.preffix}.sampled.fq.gz {input.fastq} > {log} 2>&1
+    fi
+    if [ ! -f {output.stat} ];then
+        seqkit fx2tab -l -g -q -n -j {threads} --compress-level 5 -o {output.stat} {params.preffix}.sampled.fq.gz > {log} 2>&1
+    fi
     {SNAKEDIR}/scripts/plot_readQC.py {output.stat} "passed reads" {params.preffix} > {log} 2>&1
     """
 
@@ -56,7 +60,11 @@ rule qc_fulllen:
         "benchmarks/qc_fullLen.{sample}.benchmark"
     threads: 8
     shell:"""
-    seqkit sample -p 0.1 -j {threads} -o {params.preffix}.sampled.fq.gz {input.fastq} > {log} 2>&1
-    seqkit fx2tab -l -g -q -n -j {threads} --compress-level 5 -o {output.stat} {params.preffix}.sampled.fq.gz > {log} 2>&1
+    if [ ! -f {params.preffix}.sampled.fq.gz ];then
+        seqkit sample -p 0.1 -j {threads} -o {params.preffix}.sampled.fq.gz {input.fastq} > {log} 2>&1
+    fi
+    if [ ! -f {output.stat} ];then
+        seqkit fx2tab -l -g -q -n -j {threads} --compress-level 5 -o {output.stat} {params.preffix}.sampled.fq.gz > {log} 2>&1
+    fi
     {SNAKEDIR}/scripts/plot_readQC.py {output.stat} "full-length reads" {params.preffix} > {log} 2>&1
     """

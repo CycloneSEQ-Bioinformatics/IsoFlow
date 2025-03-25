@@ -253,6 +253,7 @@ for mix in mix_categories:
     fl_reads_images[mix] = [image_to_base64(f"fl_reads/{mix}/{mix}.{img_type}") for img_type in image_types]
 
 
+
 # 为第二部分准备图片路径
 #transcript_depth_image = "known_transcripts_depth/Profile.png"
 transcript_depth_image = image_to_base64("known_transcripts_depth/Profile.png")
@@ -298,9 +299,19 @@ if sashimi_filename:
 else:
     Most_significance_sashimi_plot = None
 
-#4 span_reads_heatmap.png
+#4 gene_fusion_circos_plot.png
 
-fusion_heatmap = image_to_base64("jaffal_fusion/span_reads_heatmap.png")
+fusion_images = {} 
+root_dir1 = 'jaffal_fusion'
+mix_categories1 = []
+for subdir in os.listdir(root_dir1):
+    subdir_path = os.path.join(root_dir1, subdir)
+    if os.path.isdir(subdir_path) and subdir != '.ipynb_checkpoints':
+        mix_categories1.append(subdir)
+
+        
+for mix in mix_categories1:
+    fusion_images[mix] = image_to_base64(f"jaffal_fusion/{mix}/gene_fusion_circos_plot.png")
 
 #4 which_to_show
 fusion_plot_dir = './jaffal_fusion'
@@ -315,7 +326,6 @@ if fusion_filename:
     fusion_plot = image_to_base64(f"jaffal_fusion/{fusion_filename}")
 else:
     fusion_plot = None
-
     
 html_template = """
 <!DOCTYPE html>
@@ -559,6 +569,33 @@ html_template = """
 
         .accordion-button.active:after {
           content: "-"; /* 减号 */
+        }
+        
+        /* 精准调整3.4和3.5按钮，使其文字与普通li对齐 */
+        .accordion-button.subsection-aligned { 
+            position: relative;
+            padding-left: 8px;
+            font-weight: normal;            /* 去掉加粗 */
+            background-color: transparent;  /* 默认背景透明 */
+            box-shadow: none;               /* 防止额外的阴影效果 */
+            color: #000000;
+        }
+
+        .accordion-button.subsection-aligned:after {
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .accordion-button.subsection-aligned:hover,
+        .accordion-button.subsection-aligned.active {
+            background-color: transparent;  /* 悬停和激活时也保持无背景 */
+            font-weight: normal;            /* 防止悬停时加粗 */
+        }
+        
+        .subsection-li {
+            margin: 5px 0;
         }
 
         /* 手风琴面板样式 */
@@ -842,27 +879,31 @@ html_template = """
                     <li><a href="#b1" class="toc-link">3.1 Alignment summary: transcriptome alignment</a></li>
                     <li><a href="#b2" class="toc-link">3.2 Coverage on known transcripts and genes</a></li>
                     <li><a href="#b3" class="toc-link">3.3 TPM(Transcripts Per Million)</a></li>
-                    <!-- 三级标题 -->
-                    <button class="accordion-button">
-                        <a href="#b4" style="text-decoration: none; color: inherit;">3.4 Differential expression anlysis </a>
-                    </button>
-                    <div class="submenu-3">
-                        <ul class="list-unstyled">
-                            <li><a href="#b5" class="toc-link">3.4.1 Differential gene expression</a></li>
-                            <li><a href="#b6" class="toc-link">3.4.2 Differential transcript expression</a></li>
-                        </ul>
-                    </div>
+
+                    <li class="subsection-li">
+                        <button class="accordion-button subsection-aligned">
+                            <span>3.4 Differential expression analysis</span>
+                        </button>
+                        <div class="submenu-3">
+                            <ul class="list-unstyled">
+                                <li><a href="#b5" class="toc-link">3.4.1 Differential gene expression</a></li>
+                                <li><a href="#b6" class="toc-link">3.4.2 Differential transcript expression</a></li>
+                            </ul>
+                        </div>
+                    </li>
 
                     <!-- 三级标题 -->
-                    <button class="accordion-button">
-                        <a href="#b7" style="text-decoration: none; color: inherit;">3.5 Differential splicing analysis </a>
-                    </button>
-                    <div class="submenu-3">
-                        <ul class="list-unstyled">
-                            <li><a href="#b8" class="toc-link">3.5.1 Differential splicing with local events</a></li>
-                            <li><a href="#b9" class="toc-link">3.5.2 Differential transcript usage</a></li>
-                        </ul>
-                    </div>
+                    <li class="subsection-li">
+                        <button class="accordion-button subsection-aligned">
+                            <span>3.5 Differential splicing analysis</span>
+                        </button>
+                        <div class="submenu-3">
+                            <ul class="list-unstyled">
+                                <li><a href="#b8" class="toc-link">3.5.1 Differential splicing with local events</a></li>
+                                <li><a href="#b9" class="toc-link">3.5.2 Differential transcript usage</a></li>
+                            </ul>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -892,7 +933,7 @@ html_template = """
              <p>For both passed reads and full-length reads, length distribution charts, quality score distribution charts, and GC content distribution charts are displayed. The x-axis represents read length, read quality score, and GC content, respectively, while the y-axis represents the number of reads. </p>
             
             
-            <!-- 下拉菜单 -->
+        <!-- 下拉菜单 -->
         <label for="sample-select"> </label>
         <select id="sample-select" onchange="showImages(this)">
             <option value="">--Please choose a sample--</option>
@@ -966,13 +1007,6 @@ html_template = """
 
     <!-- JavaScript 部分 -->
     <script type="text/javascript">
-        // 页面加载时自动显示第一个样本的图片
-        window.onload = function() {
-            // 默认显示第一个样本的信息
-            const selectElement = document.getElementById("sample-select");
-            selectElement.value = selectElement.options[1].value; // 设置为第一个样本的值
-            showImages(selectElement);  // 调用函数显示对应的图片
-        };
 
         function showImages(selectElement) {
             // 隐藏所有的图片组
@@ -1332,17 +1366,73 @@ html_template = """
             </div>
             
             
-            <!-- 添加单个图片：results_dge.maplot.png -->
-            <div class="image-text-container bordered">
-                <div class="image-half">
-                    <img src="{{ fusion_heatmap }}" alt="fusion_heatmap" style="width: 70%; height: auto;">
+            <!-- 下拉菜单 -->
+            <label for="fusion-sample-select"></label>
+            <select id="fusion-sample-select" onchange="showFusionImage(this)">
+                <option value="">--Please choose a sample--</option>
+                {% for mix in fusion_images.keys()  | sort %}
+                <option value="{{ mix }}">{{ mix }}</option>
+                {% endfor %}
+            </select>
+            
+            <!-- 图片+文本排版容器 -->
+            <div id="fusion-image-container" style="margin-top: 20px;">
+                {% for mix, img_data in fusion_images.items()  %}
+                <div id="fusion-{{ mix }}" class="fusion-image" style="display: none;">
+                    <!-- 使用原来排版方式，图片+文本部分 -->
+                    <div class="image-text-container bordered">
+                        <div class="image-half">
+                            <img src="{{ img_data }}" alt="{{ mix }} gene fusion plot" style="width: 70%; height: auto;">
+                        </div>
+                        <div class="text-half">
+                            <p>
+                                The Circos plot displays detected gene fusion events. Arcs connecting genomic regions represent fusions: Red arcs indicate potentially novel fusion events not previously reported (unknown); Blue arcs represent known, previously documented fusion events. The thickness of each arc is proportional to the number of supporting spanning reads identified by the JAFFAL analysis, with more reads resulting in a thicker arc. <br>
+                            </p>
+                        </div> 
+                    </div>
                 </div>
-                <div class="text-half">
-                    <p>
-                        The figure below presents a heatmap of highly significant fusion genes, with the x-axis representing the Sample ID, the y-axis representing pairs of fusion genes, and the intensity reflecting the number of supporting reads. <br>
-                    </p>
-                </div> 
+                {% endfor %}
             </div>
+
+            <script type="text/javascript">
+                function showFusionImage(selectElement) {
+                    // 隐藏所有图像
+                    const allImages = document.querySelectorAll('.fusion-image');
+                    allImages.forEach(image => {
+                        image.style.display = 'none';
+                    });
+
+                    // 获取用户选择的样本
+                    const selectedSample = selectElement.value;
+
+                    // 如果选择了某个样本，显示对应的图片
+                    if (selectedSample) {
+                        const selectedImage = document.getElementById('fusion-' + selectedSample);
+                        if (selectedImage) {
+                            selectedImage.style.display = 'block';
+                        }
+                    }
+                }
+
+                // 页面加载自动显示第一个样本（可选）
+                    window.onload = function() {
+                    // 1.1 默认选择第一个样本
+                    const qcSelect = document.getElementById("sample-select");
+                    if (qcSelect && qcSelect.options.length > 1) {
+                        qcSelect.selectedIndex = 1;
+                        showImages(qcSelect);
+                    }
+
+                    // 4.1 默认选择第一个样本
+                    const fusionSelect = document.getElementById("fusion-sample-select");
+                    if (fusionSelect && fusionSelect.options.length > 1) {
+                        fusionSelect.selectedIndex = 1;
+                        showFusionImage(fusionSelect);
+                    }
+                };
+            </script>
+            
+            
             
             
             
@@ -1463,8 +1553,8 @@ iso_isoform_df_html=iso_isoform_df_html,
 suppa_diffSplice_iso_df_html=suppa_diffSplice_iso_df_html,
 Most_significance_sashimi_plot=Most_significance_sashimi_plot,
 jaffa_results_df_html=jaffa_results_df_html,
-fusion_heatmap=fusion_heatmap,
-fusion_plot=fusion_plot)
+fusion_plot=fusion_plot,
+fusion_images=fusion_images)
 
 
 output_file = 'report_files/Report_EN.html'  # 修改为您想要的文件名
